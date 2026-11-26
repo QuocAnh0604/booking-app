@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './features/users/entities/user.entity';
 import { Booking } from './features/bookings/entities/booking.entity';
+import { Service } from './features/services/entities/service.entity';
 import { Provider } from './features/providers/entities/provider.entity';
 import { RoomType } from './features/room-types/entities/room-type.entity';
 import { Room } from './features/rooms/entities/room.entity';
@@ -16,6 +17,8 @@ import { ServiceModule } from './features/services/service.module';
 import type { Duration } from '@nestjs/authentication';
 import { AuthorizationModule } from '@nestjs/authorization';
 import { BookingModule } from './features/bookings/booking.module';
+import { UserPolicy } from './features/users/policies/user.policy';
+import { ServicePolicy } from './features/services/service.policy';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -31,7 +34,7 @@ import { BookingModule } from './features/bookings/booking.module';
         username: configService.getOrThrow<string>('DB_USERNAME'),
         password: configService.getOrThrow<string>('DB_PASSWORD'),
         database: configService.getOrThrow<string>('DB_NAME'),
-        entities: [User, Provider, RoomType, Room, Booking],
+        entities: [User, Provider, RoomType, Room, Service, Booking],
         synchronize: true,
       }),
     }),
@@ -51,7 +54,12 @@ import { BookingModule } from './features/bookings/booking.module';
         allowInMemoryStorage: true,
       }),
     }),
-    AuthorizationModule.forRoot(),
+    AuthorizationModule.forRoot({
+      policies: [
+        UserPolicy,
+        ServicePolicy,
+      ],
+    }),
     UserModule, AuthModule, ProvidersModule, ServiceModule, BookingModule,
   ],
   controllers: [AppController],
