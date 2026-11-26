@@ -1,6 +1,10 @@
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
-
+import { User } from '../features/users/entities/user.entity';
+import { Provider } from '../features/providers/entities/provider.entity';
+import { Booking } from '../features/bookings/entities/booking.entity';
+import { Service } from '../features/services/entities/service.entity';
+import { Category } from '../features/categories/entities/category.entity';
 export default new DataSource({
   type: 'postgres',
   host: process.env.DB_HOST,
@@ -9,8 +13,10 @@ export default new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
 
-  entities: ['src/**/*.entity.ts'],
-  migrations: ['src/database/migrations/*.ts'],
+  entities: [User, Provider, Category, Service, Booking],
+  migrations: [
+    'src/database/migrations/[0-9]*.ts',
+  ],
 
   synchronize: false,
   logging: true,
