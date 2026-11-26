@@ -5,9 +5,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './features/users/entities/user.entity';
 import { Booking } from './features/bookings/entities/booking.entity';
-import { Hotel } from './features/hotels/entities/hotel.entity';
+import { Provider } from './features/providers/entities/provider.entity';
 import { RoomType } from './features/room-types/entities/room-type.entity';
 import { Room } from './features/rooms/entities/room.entity';
+import { AuthenticationModule } from '@nestjs/authentication';
+import { UserModule } from './features/users/user.module';
+import { AuthModule } from './features/auths/auth.module';
+import { ProvidersModule } from './features/providers/providers.module';
+import { ServiceModule } from './features/services/service.module';
+import type { Duration } from '@nestjs/authentication';
+import { AuthorizationModule } from '@nestjs/authorization';
+import { BookingModule } from './features/bookings/booking.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,12 +31,30 @@ import { Room } from './features/rooms/entities/room.entity';
         username: configService.getOrThrow<string>('DB_USERNAME'),
         password: configService.getOrThrow<string>('DB_PASSWORD'),
         database: configService.getOrThrow<string>('DB_NAME'),
-        entities: [User, Hotel, RoomType, Room, Booking],
+        entities: [User, Provider, RoomType, Room, Booking],
         synchronize: true,
       }),
     }),
+    AuthenticationModule.forRootAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        accessToken: {
+          key: config.getOrThrow<string>('JWT_ACCESS_TOKEN'),
+          ttl: config.get<string>('JWT_ACCESS_TTL', '15m') as Duration,
+        },
+        refreshToken: {
+          key: config.getOrThrow<string>('JWT_REFRESH_TOKEN'),
+          ttl: config.get<string>('JWT_REFRESH_TTL', '7d') as Duration,
+        },
+        allowInMemoryStorage: true,
+      }),
+    }),
+    AuthorizationModule.forRoot(),
+    UserModule, AuthModule, ProvidersModule, ServiceModule, BookingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

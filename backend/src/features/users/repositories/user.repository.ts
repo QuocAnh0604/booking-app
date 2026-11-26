@@ -10,18 +10,20 @@ export class UserRepository {
     private readonly repository: Repository<User>,
   ) {}
 
-  create(data: DeepPartial<User>): Promise<User> {
+  async create(data: DeepPartial<User>): Promise<User> {
     return this.repository.save(this.repository.create(data));
   }
 
-  findAll(): Promise<User[]> {
+  async findAll(): Promise<User[]> {
     return this.repository.find();
   }
 
-  findById(id: string): Promise<User | null> {
+  async findById(id: string): Promise<User | null> {
     return this.repository.findOneBy({ id });
   }
-
+  async findByEmail(email: string): Promise<User | null> {
+    return this.repository.findOneBy({email})
+  }
   async update(id: string, data: DeepPartial<User>): Promise<User | null> {
     await this.repository.update(id, data);
     return this.findById(id);
